@@ -1,0 +1,88 @@
+import express from "express"
+// import CartContainer from "../managers/contenedorCarrito";
+// import Model from "../managers/ContenedorMongo.js";
+// import { cartSchema } from "../models/cart.js";
+import {ContenedorDaoCarritos} from "../daos/index.js";
+
+export const cartRouter = express.Router();
+
+
+const cartService = ContenedorDaoCarritos;
+
+cartRouter.get("/",async(req,res)=>{
+    try {
+        const carritos = await cartService.getAll();
+        console.log(carritos)
+        res.status(200).send("Todo OK")
+    } catch (error) {
+        res.status(500).send("hubo un error en el servidor")
+    }
+})
+
+
+cartRouter.get("/:id", async(req,res)=>{
+    const {id} = req.params;
+    const carrito = await cartService.getById(parseInt(id));
+    if(carrito){
+        // falta implementar
+        // res.render('singlecartt', {carrito})
+        console.log(carrito)
+        res.status(200).send("Todo OK")
+    }else{
+        res.json({
+            message:"producto no encontrado"
+        })
+    }
+})
+
+// Crea un nuevo carrito
+cartRouter.post("/",async(req,res)=>{
+    const carrito = req.body;
+    const carritos = await cartService.save(carrito);
+    console.log(carritos)
+    res.status(200).send("Todo OK")
+})
+
+
+// Agrega un producto en carrito existente
+cartRouter.post("/:id", async(req,res)=>{
+    const {id} = req.params;
+    const producto = req.body;
+    const carrito = await cartService.getById(parseInt(id));
+    console.log(carrito.producto);
+    nuevoProducto = {
+        productoTimestamP: Date.now(),
+        ...producto
+    }
+    console.log(nuevoProducto);
+    carrito.producto.push(nuevoProducto)
+    console.log(carrito.producto)
+    const carritos = await cartService.updateById(parseInt(id),carrito);
+    // falta implementar
+    // res.render('cart', { carritos: carritos })
+    console.log(carritos)
+    res.status(200).send("Todo OK")
+})
+
+// modifica un carrito determinado por el parametro suministrado
+cartRouter.put("/:id", async(req,res)=>{
+    const {id} = req.params;
+    const carrito = req.body;
+    const carritos = await cartService.updateById(parseInt(id),carrito);
+    res.json({
+        message:`El carrito con el id ${id} fue actualizado`,
+        response: carritos
+    })
+})
+
+// borra un carrito determinado por el parametro suministrado
+cartRouter.delete("/:id", async(req,res)=>{
+    const {id} = req.params;
+    const carritos = await cartService.deleteById(parseInt(id));
+    // falta implementar
+    // res.render('cart', { carritos: carritos })
+    console.log(carritos)
+    res.status(200).send("Todo OK")
+})
+
+
